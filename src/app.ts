@@ -3,6 +3,7 @@ import cors from "cors";
 import { config } from "./app/config";
 import cookieParser from "cookie-parser";
 import { notFound } from "./app/middleware/notFound";
+import { AuthRoutes } from "./app/module/auth/auth.route";
 const app: Application = express();
 
 app.use(
@@ -29,6 +30,8 @@ app.get("/", (req, res) => {
     message: "Welcome to the University Management System",
   });
 });
+
+app.use("/api/v1/auth", AuthRoutes);
 
 app.use(notFound);
 

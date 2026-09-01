@@ -1,0 +1,13 @@
+model StudentIdSequence {
+  id           String   @id @default(uuid())
+  departmentId String
+  year         Int
+  lastNumber   Int      @default(0)
+
+  department Department @relation(fields: [departmentId], references: [id])
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([departmentId, year])
+  @@map("student_id_sequences")
+}

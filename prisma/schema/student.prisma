@@ -1,0 +1,63 @@
+model StudentProfile {
+  id String @id @default(uuid())
+
+  studentId String @unique
+
+  userId String @unique
+
+  dateOfBirth DateTime?
+
+  gender Gender?
+
+  phone String?
+
+  address String?
+
+  emergencyContactName String?
+
+  emergencyContactPhone String?
+
+  admissionDate DateTime
+
+  admissionYear Int
+
+  currentSemesterNumber Int?
+
+  status StudentStatus @default(ACTIVE)
+
+  academicStatus AcademicStatus @default(GOOD_STANDING)
+
+  departmentId String
+
+  programId String
+
+  user User @relation( fields: [userId],references: [id],onDelete: Cascade)
+
+  department Department @relation(fields: [departmentId],references: [id])
+
+  program Program @relation( fields: [programId],references: [id])
+
+//   registrations Registration[]
+
+//   academicRecords AcademicRecord[]
+
+//   invoices Invoice[]
+
+//   payments Payment[]
+
+//   scholarships StudentScholarship[]
+
+//   graduationApplications GraduationApplication[]
+
+//   transcripts Transcript[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([departmentId])
+  @@index([programId])
+  @@index([status])
+  @@index([admissionYear])
+  @@map("student_profiles")
+}

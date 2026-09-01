@@ -1,0 +1,18 @@
+model AcademicYear {
+  id String @id @default(uuid())
+
+  name String
+
+  startDate DateTime
+
+  endDate DateTime
+
+  semesters Semester[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
+  @@map("academic_years")
+}

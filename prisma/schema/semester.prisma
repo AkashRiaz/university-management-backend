@@ -1,0 +1,38 @@
+model Semester {
+  id String @id @default(uuid())
+
+  name SemesterType
+
+  startDate DateTime
+
+  endDate DateTime
+
+  registrationStart DateTime
+
+  registrationEnd DateTime
+
+  status SemesterStatus @default(UPCOMING)
+
+  academicYearId String
+
+  academicYear AcademicYear @relation(fields: [academicYearId],references: [id],onDelete: Cascade)
+
+//   sections Section[]
+
+//   registrations Registration[]
+
+//   academicRecords AcademicRecord[]
+
+//   feeStructures FeeStructure[]
+
+//   studentScholarships StudentScholarship[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([academicYearId, name])
+  @@index([academicYearId])
+  @@index([status])
+  @@map("semesters")
+}

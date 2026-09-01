@@ -34,6 +34,16 @@ model User {
 
   updatedAt DateTime @updatedAt
 
+  student StudentProfile?
+
+//   instructor InstructorProfile?
+
+  refreshTokens RefreshToken[]
+
+//   notifications Notification[]
+
+//   auditLogs AuditLog[]
+
   @@index([email])
   @@index([role])
   @@index([status])
