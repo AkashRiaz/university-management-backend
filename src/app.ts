@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import { config } from "./app/config";
 import cookieParser from "cookie-parser";
+import { notFound } from "./app/middleware/notFound";
 const app: Application = express();
 
 app.use(
@@ -28,5 +29,7 @@ app.get("/", (req, res) => {
     message: "Welcome to the University Management System",
   });
 });
+
+app.use(notFound);
 
 export default app;
