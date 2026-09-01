@@ -1,0 +1,41 @@
+model User {
+  id String @id @default(uuid())
+
+  name String
+
+  email String @unique
+
+  password String?
+
+  // Google OAuth is intended only for students.
+  googleId String? @unique
+
+  authProvider AuthProvider @default(CREDENTIALS)
+
+  emailVerified Boolean @default(false)
+
+  role Role @default(STUDENT)
+
+  status UserStatus @default(ACTIVE)
+
+  needPasswordChange Boolean @default(false)
+
+  isDeleted Boolean @default(false)
+
+  imageUrl String?
+
+  imagePublicId String?
+
+  deletedAt DateTime?
+
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}

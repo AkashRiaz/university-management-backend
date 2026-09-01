@@ -1,0 +1,241 @@
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  DEPARTMENT_ADMIN
+  REGISTRAR
+  FINANCE_ADMIN
+  UNIVERSITY_ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  GRADUATED
+  DROPPED_OUT
+  WITHDRAWN
+}
+
+enum AcademicStatus {
+  GOOD_STANDING
+  WARNING
+  PROBATION
+  SUSPENDED
+}
+
+enum InstructorDesignation {
+  LECTURER
+  ASSISTANT_PROFESSOR
+  ASSOCIATE_PROFESSOR
+  PROFESSOR
+  ADJUNCT
+  VISITING_PROFESSOR
+}
+
+enum SemesterType {
+  SPRING
+  SUMMER
+  FALL
+  WINTER
+}
+
+enum SemesterStatus {
+  UPCOMING
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ACTIVE
+  EXAMINATION
+  COMPLETED
+  CANCELLED
+}
+
+enum CourseType {
+  THEORY
+  LAB
+  PROJECT
+  THESIS
+  SEMINAR
+}
+
+enum CourseLevel {
+  UNDERGRADUATE
+  POSTGRADUATE
+  PHD
+}
+
+enum SectionStatus {
+  OPEN
+  FULL
+  CLOSED
+  CANCELLED
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  DROPPED
+  COMPLETED
+  CANCELLED
+}
+
+enum CourseRegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  DROPPED
+  WITHDRAWN
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum ExamType {
+  QUIZ
+  MIDTERM
+  FINAL
+  ASSIGNMENT
+  LAB
+  VIVA
+  PROJECT
+  THESIS
+}
+
+enum ResultStatus {
+  DRAFT
+  SUBMITTED
+  PUBLISHED
+  LOCKED
+  REVISED
+}
+
+enum GradeType {
+  LETTER
+  NUMERIC
+  PASS_FAIL
+}
+
+enum PaymentGateway {
+  BKASH
+  STRIPE
+}
+
+enum PaymentMethod {
+  MOBILE_BANKING
+  CARD
+  BANK_TRANSFER
+  CASH
+  ONLINE
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum NotificationType {
+  SYSTEM
+  ANNOUNCEMENT
+  REGISTRATION
+  EXAM
+  RESULT
+  PAYMENT
+  ATTENDANCE
+  ACADEMIC
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+enum ScholarshipType {
+  MERIT
+  NEED_BASED
+  ATHLETIC
+  GOVERNMENT
+  DEPARTMENT
+  OTHER
+}
+
+enum ScholarshipStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+enum GraduationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  APPROVE
+  REJECT
+  PUBLISH
+  CANCEL
+  PAYMENT
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
