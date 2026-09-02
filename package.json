@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "format:check": "npx @biomejs/biome format ./src",
+    "format:fix": "npx @biomejs/biome format --write ./src",
+    "lint:check": "npx @biomejs/biome lint ./src",
+    "lint:fix": "npx @biomejs/biome lint --write ./src"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +24,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@biomejs/biome": "^2.5.11",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@types/bcrypt": "^6.0.0",
