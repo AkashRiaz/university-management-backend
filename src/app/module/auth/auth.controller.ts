@@ -65,7 +65,68 @@ const refreshToken = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const googleLoginForStudent = catchAsync(
+  async (req: Request, res: Response) => {
+    const payload = req.body;
+
+    const { user, accessToken, refreshToken } =
+      await AuthService.googleLoginForStudent(payload);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Logged in with Google successfully",
+      data: {
+        accessToken,
+        refreshToken,
+        user,
+      },
+    });
+  },
+);
+
+const logout = catchAsync(async (req: Request, res: Response) => {
+  const token = req.cookies.refreshToken;
+
+  await AuthService.logout(token);
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Logout successful",
+    data: null,
+  });
+});
+
 export const AuthController = {
   verifyStudentEmail,
   refreshToken,
+  logout,
+  googleLoginForStudent,
 };

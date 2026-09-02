@@ -1,0 +1,221 @@
+```ejs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Welcome to Your Student Account</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #333333;
+    }
+
+    .email-wrapper {
+      width: 100%;
+      padding: 40px 15px;
+      box-sizing: border-box;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .header {
+      background-color: #1f4e79;
+      color: #ffffff;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .content {
+      padding: 35px 30px;
+    }
+
+    .content h2 {
+      margin-top: 0;
+      color: #1f4e79;
+      font-size: 22px;
+    }
+
+    .content p {
+      font-size: 15px;
+      line-height: 1.7;
+      margin: 12px 0;
+    }
+
+    .student-info {
+      margin: 25px 0;
+      background-color: #f7f9fb;
+      border: 1px solid #e1e6eb;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .student-info table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .student-info td {
+      padding: 9px 5px;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .student-info td:first-child {
+      width: 40%;
+      font-weight: bold;
+      color: #555555;
+    }
+
+    .success-message {
+      margin: 25px 0;
+      padding: 15px;
+      background-color: #eef8f1;
+      border-left: 4px solid #28a745;
+      border-radius: 4px;
+      color: #245b32;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .footer {
+      background-color: #f4f6f8;
+      text-align: center;
+      padding: 20px;
+      color: #777777;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .email-wrapper {
+        padding: 20px 10px;
+      }
+
+      .content {
+        padding: 25px 20px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="email-wrapper">
+
+    <div class="email-container">
+
+      <!-- Header -->
+      <div class="header">
+        <h1>Welcome to Your Student Account</h1>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+
+        <h2>Hello <%= name %>,</h2>
+
+        <p>
+          Welcome! Your student account has been successfully connected
+          with your Google account.
+        </p>
+
+        <div class="success-message">
+          Your Google sign-in was successful, and your student account is
+          now ready to use.
+        </div>
+
+        <!-- Student Information -->
+        <div class="student-info">
+
+          <table>
+            <tr>
+              <td>Student Name</td>
+              <td><%= name %></td>
+            </tr>
+
+            <tr>
+              <td>Email Address</td>
+              <td><%= email %></td>
+            </tr>
+
+            <% if (studentId) { %>
+            <tr>
+              <td>Student ID</td>
+              <td><%= studentId %></td>
+            </tr>
+            <% } %>
+
+            <% if (departmentName) { %>
+            <tr>
+              <td>Department</td>
+              <td><%= departmentName %></td>
+            </tr>
+            <% } %>
+
+            <% if (programName) { %>
+            <tr>
+              <td>Program</td>
+              <td><%= programName %></td>
+            </tr>
+            <% } %>
+          </table>
+
+        </div>
+
+        <p>
+          You can now use your Google account to securely access your
+          student account.
+        </p>
+
+        <p>
+          Thank you for joining us. We wish you a successful academic journey!
+        </p>
+
+        <p>
+          Best regards,<br />
+          <strong>Student Administration</strong>
+        </p>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          This is an automated email. Please do not reply to this message.
+        </p>
+
+        <p>
+          &copy; <%= new Date().getFullYear() %> Your Institution.
+          All rights reserved.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
+```
