@@ -12,15 +12,33 @@ import {
   UserStatus,
 } from "../../../generated/prisma/enums";
 import { generateStudentId } from "../../helper/generateStudentId";
+import { redisClient } from "../../lib/redis";
+import path from "path";
+import ejs from "ejs";
+import { transporter } from "../../lib/nodemailer";
 
 const registerStudent = async (payload: ICreateStudentPayload) => {
   const department = await prisma.department.findUnique({
     where: { id: payload.departmentId },
-    select: { code: true },
   });
 
   if (!department) {
     throw new AppError(httpStatus.NOT_FOUND, "Department not found");
+  }
+
+  const program = await prisma.program.findUnique({
+    where: { id: payload.programId },
+  });
+
+  if (!program) {
+    throw new AppError(httpStatus.NOT_FOUND, "Program not found");
+  }
+
+  if (program.departmentId !== payload.departmentId) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Program does not belong to the specified department",
+    );
   }
 
   const existingUser = await prisma.user.findUnique({
@@ -53,6 +71,9 @@ const registerStudent = async (payload: ICreateStudentPayload) => {
         needPasswordChange: true,
         emailVerified: false,
       },
+      omit: {
+        password: true,
+      },
     });
 
     const studentId = await generateStudentId(
@@ -66,7 +87,7 @@ const registerStudent = async (payload: ICreateStudentPayload) => {
         studentId,
         userId: user.id,
         departmentId: payload.departmentId,
-        programId: "123",
+        programId: payload.programId,
         admissionDate: payload.admissionDate,
         admissionYear: payload.admissionYear,
         gender: payload.gender,
@@ -88,7 +109,31 @@ const registerStudent = async (payload: ICreateStudentPayload) => {
   const expirationSeconds = 5 * 60;
   const otp = crypto.randomInt(100000, 999999).toString();
   const otpKey = `student-verification-otp:${result.user.email}`;
-  
+
+  await redisClient.set(otpKey, otp, {
+    expiration: { type: "EX", value: expirationSeconds },
+  });
+
+  const templatePath = path.join(
+    process.cwd(),
+    "src/app/templates/student-welcome-otp.ejs",
+  );
+  const html = await ejs.renderFile(templatePath, {
+    name: result.user.name,
+    studentId: result.studentProfile.studentId,
+    tempPassword,
+    otp,
+    expirationMinutes: expirationSeconds / 60,
+  });
+
+  await transporter.sendMail({
+    from: config.smtp_user,
+    to: result.user.email,
+    subject: "Your student account has been created — verify your email",
+    html,
+  });
+
+  return { user: result.user, studentProfile: result.studentProfile };
 };
 
 export const StudentService = {

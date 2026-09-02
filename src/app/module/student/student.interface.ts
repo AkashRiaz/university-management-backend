@@ -7,7 +7,7 @@ export interface ICreateStudentPayload {
 
   // StudentProfile fields
   departmentId: string;
-//   programId: string;
+  programId: string;
   admissionDate: Date;
   admissionYear: number;
   gender?: Gender;
