@@ -24,4 +24,40 @@ export const config = {
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY!,
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET!,
   google_client_id: process.env.GOOGLE_CLIENT_ID,
+
+  super_admin_name: process.env.SUPER_ADMIN_NAME,
+  super_admin_email: process.env.SUPER_ADMIN_EMAIL,
+  super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
+
+  // ============================================
+  // Tester Admin
+  // ============================================
+
+  tester_admin_name: process.env.TESTER_ADMIN_NAME,
+  tester_admin_email: process.env.TESTER_ADMIN_EMAIL,
+  tester_admin_password: process.env.TESTER_ADMIN_PASSWORD,
+
+  // ============================================
+  // Tester Department Admin
+  // ============================================
+
+  tester_department_admin_name: process.env.TESTER_DEPARTMENT_ADMIN_NAME,
+  tester_department_admin_email: process.env.TESTER_DEPARTMENT_ADMIN_EMAIL,
+  tester_department_admin_password:process.env.TESTER_DEPARTMENT_ADMIN_PASSWORD,
+
+  // ============================================
+  // Tester Registrar
+  // ============================================
+
+  tester_registrar_name: process.env.TESTER_REGISTRAR_NAME,
+  tester_registrar_email: process.env.TESTER_REGISTRAR_EMAIL,
+  tester_registrar_password: process.env.TESTER_REGISTRAR_PASSWORD,
+
+  // ============================================
+  // Tester Finance Admin
+  // ============================================
+
+  tester_finance_admin_name: process.env.TESTER_FINANCE_ADMIN_NAME,
+  tester_finance_admin_email: process.env.TESTER_FINANCE_ADMIN_EMAIL,
+  tester_finance_admin_password: process.env.TESTER_FINANCE_ADMIN_PASSWORD,
 };

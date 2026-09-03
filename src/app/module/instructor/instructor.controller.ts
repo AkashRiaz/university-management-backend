@@ -116,6 +116,7 @@ const updateMyProfile = async (req: Request, res: Response) => {
 
 const updateInstructorByAdmin = async (req: Request, res: Response) => {
   const { id } = req.params;
+  console.log(id, "instructor id");
 
   const result = await InstructorService.updateInstructorByAdmin(
     id as string,
