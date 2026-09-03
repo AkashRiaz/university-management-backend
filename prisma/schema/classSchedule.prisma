@@ -1,0 +1,27 @@
+model ClassSchedule {
+  id String @id @default(uuid())
+
+  dayOfWeek Int
+
+  startTime String
+
+  endTime String
+
+  sectionId String
+
+  roomId String?
+
+  departmentId String
+
+  section Section @relation(fields: [sectionId],references: [id],onDelete: Cascade)
+
+  room Room? @relation(fields: [roomId],references: [id])
+
+  department Department @relation(fields: [departmentId],references: [id])
+
+  @@index([sectionId])
+  @@index([roomId])
+  @@index([departmentId])
+  @@index([dayOfWeek])
+  @@map("class_schedules")
+}

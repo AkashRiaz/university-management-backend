@@ -1,0 +1,20 @@
+model ProgramCourse {
+  id String @id @default(uuid())
+
+  programId String
+
+  courseId String
+
+  semesterNumber Int
+
+  isRequired Boolean @default(true)
+
+  program Program @relation(fields: [programId],references: [id], onDelete: Cascade)
+
+  course Course @relation(fields: [courseId],references: [id],onDelete: Cascade)
+
+  @@unique([programId, courseId])
+  @@index([programId])
+  @@index([courseId])
+  @@map("program_courses")
+}

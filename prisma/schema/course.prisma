@@ -1,0 +1,36 @@
+model Course {
+  id String @id @default(uuid())
+
+  code String
+
+  title String
+
+  description String?
+
+  credit Decimal @db.Decimal(4, 2)
+
+  courseType CourseType
+
+  courseLevel CourseLevel
+
+  departmentId String
+
+  department Department @relation(fields: [departmentId],references: [id])
+
+  programs ProgramCourse[]
+
+  prerequisites CoursePrerequisite[] @relation("CoursePrerequisites")
+
+  requiredFor CoursePrerequisite[] @relation("RequiredForCourses")
+
+  sections Section[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([departmentId, code])
+  @@index([departmentId])
+  @@index([code])
+  @@map("courses")
+}

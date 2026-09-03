@@ -21,6 +21,7 @@ import path from "path";
 import ejs from "ejs";
 import { transporter } from "../../lib/nodemailer";
 import bcrypt from "bcrypt";
+import { RequestUser } from "../../middleware/checkAuth";
 
 const verifyStudentEmail = async (payload: IVerifyEmailPayload) => {
   const { email, otp } = payload;
@@ -457,6 +458,31 @@ const googleLoginForStudent = async (payload: IGoogleLoginPayload) => {
   };
 };
 
+const getMe = async (user: RequestUser) => {
+  const isUserExist = await prisma.user.findUnique({
+    where: {
+      id: user.userId,
+    },
+    include: {
+      student: {
+        include: {
+          department: true,
+          program: true,
+        },
+      },
+    },
+    omit: {
+      password: true,
+    },
+  });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  return isUserExist;
+};
+
 const forgotPassword = async (payload: IForgotPasswordPayload) => {
   const { email } = payload;
   const isUserExists = await prisma.user.findUnique({
@@ -617,6 +643,7 @@ export const AuthService = {
   refreshToken,
   logout,
   googleLoginForStudent,
+  getMe,
   forgotPassword,
   resetPassword,
   loginUser,

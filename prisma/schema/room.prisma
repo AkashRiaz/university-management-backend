@@ -1,0 +1,20 @@
+model Room {
+  id String @id @default(uuid())
+
+  building String
+
+  roomNumber String
+
+  capacity Int
+
+  sections Section[]
+
+  schedules ClassSchedule[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([building, roomNumber])
+  @@map("rooms")
+}

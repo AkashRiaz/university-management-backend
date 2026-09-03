@@ -1,0 +1,38 @@
+model Payment {
+  id String @id @default(uuid())
+
+  transactionId String @unique
+
+  studentId String
+
+  invoiceId String
+
+  amount Decimal @db.Decimal(12, 2)
+
+  gateway PaymentGateway
+
+  method PaymentMethod
+
+  status PaymentStatus @default(PENDING)
+
+  gatewayReference String?
+
+  paidAt DateTime?
+
+  metadata Json?
+
+  student StudentProfile @relation(fields: [studentId], references: [id] )
+
+  invoice Invoice @relation( fields: [invoiceId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([invoiceId])
+  @@index([gateway])
+  @@index([status])
+  @@index([paidAt])
+  @@map("payments")
+}

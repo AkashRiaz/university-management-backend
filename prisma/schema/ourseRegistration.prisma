@@ -1,0 +1,26 @@
+model CourseRegistration {
+  id String @id @default(uuid())
+
+  registrationId String
+
+  sectionId String
+
+  status CourseRegistrationStatus @default(REGISTERED)
+
+  registeredAt DateTime @default(now())
+
+  droppedAt DateTime?
+
+  registration Registration @relation(fields: [registrationId],references: [id],onDelete: Cascade)
+
+  section Section @relation(fields: [sectionId],references: [id])
+
+  attendanceRecords AttendanceRecord[]
+
+  results Result[]
+
+  @@unique([registrationId, sectionId])
+  @@index([sectionId])
+  @@index([status])
+  @@map("course_registrations")
+}

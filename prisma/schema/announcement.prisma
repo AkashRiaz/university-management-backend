@@ -1,0 +1,21 @@
+model Announcement {
+  id String @id @default(uuid())
+
+  title String
+
+  content String
+
+  isPublished Boolean @default(false)
+
+  publishedAt DateTime?
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@map("announcements")
+}

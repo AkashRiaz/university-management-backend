@@ -1,0 +1,22 @@
+model AttendanceRecord {
+  id String @id @default(uuid())
+
+  sessionId String
+
+  courseRegistrationId String
+
+  status AttendanceStatus
+
+  remarks String?
+
+  session AttendanceSession @relation(fields: [sessionId],references: [id],onDelete: Cascade)
+
+  courseRegistration CourseRegistration @relation(fields: [courseRegistrationId],references: [id],onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, courseRegistrationId])
+  @@index([courseRegistrationId])
+  @@index([status])
+  @@map("attendance_records")
+}

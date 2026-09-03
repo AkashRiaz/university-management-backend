@@ -21,15 +21,15 @@ model Department {
 
   sequences StudentIdSequence[]
 
-//   courses Course[]
+  courses Course[]
 
   students StudentProfile[]
 
-//   instructors InstructorProfile[]
+  instructors InstructorProfile[]
 
-//   sections Section[]
+  sections Section[]
 
-//   classSchedules ClassSchedule[]
+  classSchedules ClassSchedule[]
 
   createdAt DateTime @default(now())
 

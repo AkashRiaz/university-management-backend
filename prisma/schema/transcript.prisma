@@ -1,0 +1,20 @@
+model Transcript {
+  id String @id @default(uuid())
+
+  transcriptNumber String @unique
+
+  studentId String
+
+  cumulativeGPA Decimal @db.Decimal(4, 2)
+
+  totalCredits Decimal @db.Decimal(6, 2)
+
+  generatedAt DateTime @default(now())
+
+  fileUrl String?
+
+  student StudentProfile @relation(fields: [studentId],references: [id] )
+
+  @@index([studentId])
+  @@map("transcripts")
+}

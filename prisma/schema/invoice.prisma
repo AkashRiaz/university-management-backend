@@ -1,0 +1,38 @@
+model Invoice {
+  id String @id @default(uuid())
+
+  invoiceNumber String @unique
+
+  studentId String
+
+  subtotal Decimal @db.Decimal(12, 2)
+
+  discount Decimal @db.Decimal(12, 2) @default(0)
+
+  tax Decimal @db.Decimal(12, 2) @default(0)
+
+  total Decimal @db.Decimal(12, 2)
+
+  paidAmount Decimal @db.Decimal(12, 2) @default(0)
+
+  dueAmount Decimal @db.Decimal(12, 2)
+
+  dueDate DateTime
+
+  status InvoiceStatus @default(DRAFT)
+
+  student StudentProfile @relation( fields: [studentId], references: [id] )
+
+  items InvoiceItem[]
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}

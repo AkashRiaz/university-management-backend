@@ -1,0 +1,22 @@
+model Grade {
+  id String @id @default(uuid())
+
+  letter String
+
+  minMarks Decimal @db.Decimal(5, 2)
+
+  maxMarks Decimal @db.Decimal(5, 2)
+
+  gradePoint Decimal @db.Decimal(4, 2)
+
+  type GradeType
+
+  gradeScaleId String
+
+  gradeScale GradeScale @relation( fields: [gradeScaleId], references: [id],onDelete: Cascade )
+
+  results Result[]
+
+  @@unique([gradeScaleId, letter])
+  @@map("grades")
+}

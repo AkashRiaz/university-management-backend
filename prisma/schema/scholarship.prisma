@@ -1,0 +1,23 @@
+model Scholarship {
+  id String @id @default(uuid())
+
+  name String
+
+  type ScholarshipType
+
+  percentage Decimal? @db.Decimal(5, 2)
+
+  fixedAmount Decimal? @db.Decimal(12, 2)
+
+  description String?
+
+  status ScholarshipStatus @default(ACTIVE)
+
+  students StudentScholarship[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@map("scholarships")
+}

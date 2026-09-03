@@ -1,0 +1,25 @@
+model FeeStructure {
+  id String @id @default(uuid())
+
+  name String
+
+  description String?
+
+  programId String?
+
+  semesterId String?
+
+  program Program? @relation(fields: [programId],references: [id])
+
+  semester Semester? @relation( fields: [semesterId], references: [id] )
+
+  items FeeStructureItem[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([programId])
+  @@index([semesterId])
+  @@map("fee_structures")
+}

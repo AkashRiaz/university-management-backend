@@ -1,0 +1,28 @@
+model AcademicRecord {
+  id String @id @default(uuid())
+
+  studentId String
+
+  semesterId String
+
+  semesterGPA Decimal @db.Decimal(4, 2)
+
+  cumulativeGPA Decimal @db.Decimal(4, 2)
+
+  semesterCredits Decimal @db.Decimal(6, 2)
+
+  earnedCredits Decimal @db.Decimal(6, 2)
+
+  student StudentProfile @relation(fields: [studentId], references: [id])
+
+  semester Semester @relation( fields: [semesterId],references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, semesterId])
+  @@index([studentId])
+  @@index([semesterId])
+  @@map("academic_records")
+}

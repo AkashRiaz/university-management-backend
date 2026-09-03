@@ -17,15 +17,15 @@ model Semester {
 
   academicYear AcademicYear @relation(fields: [academicYearId],references: [id],onDelete: Cascade)
 
-//   sections Section[]
+  sections Section[]
 
-//   registrations Registration[]
+  registrations Registration[]
 
-//   academicRecords AcademicRecord[]
+  academicRecords AcademicRecord[]
 
-//   feeStructures FeeStructure[]
+  feeStructures FeeStructure[]
 
-//   studentScholarships StudentScholarship[]
+  studentScholarships StudentScholarship[]
 
   createdAt DateTime @default(now())
 

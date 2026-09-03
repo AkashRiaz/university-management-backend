@@ -1,0 +1,31 @@
+model Registration {
+  id String @id @default(uuid())
+
+  registrationNumber String @unique
+
+  studentId String
+
+  semesterId String
+
+  status RegistrationStatus @default(DRAFT)
+
+  submittedAt DateTime?
+
+  approvedAt DateTime?
+
+  student StudentProfile @relation(fields: [studentId],references: [id])
+
+  semester Semester @relation(fields: [semesterId],references: [id])
+
+  courses CourseRegistration[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, semesterId])
+  @@index([studentId])
+  @@index([semesterId])
+  @@index([status])
+  @@map("registrations")
+}

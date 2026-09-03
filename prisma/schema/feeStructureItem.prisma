@@ -1,0 +1,16 @@
+model FeeStructureItem {
+  id String @id @default(uuid())
+
+  feeStructureId String
+
+  name String
+
+  description String?
+
+  amount Decimal @db.Decimal(12, 2)
+
+  feeStructure FeeStructure @relation( fields: [feeStructureId], references: [id],onDelete: Cascade )
+
+  @@index([feeStructureId])
+  @@map("fee_structure_items")
+}

@@ -1,0 +1,17 @@
+model SectionInstructor {
+  id String @id @default(uuid())
+
+  sectionId String
+
+  instructorId String
+
+  isPrimary Boolean @default(false)
+
+  section Section @relation(fields: [sectionId],references: [id],onDelete: Cascade)
+
+  instructor InstructorProfile @relation(fields: [instructorId],references: [id])
+
+  @@unique([sectionId, instructorId])
+  @@index([instructorId])
+  @@map("section_instructors")
+}

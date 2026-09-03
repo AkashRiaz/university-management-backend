@@ -1,0 +1,24 @@
+model Result {
+  id String @id @default(uuid())
+
+  examId String
+
+  courseRegistrationId String
+
+  marks Decimal @db.Decimal(6, 2)
+
+  status ResultStatus @default(DRAFT)
+
+  gradeId String?
+
+  exam Exam @relation(fields: [examId],references: [id], onDelete: Cascade)
+
+  courseRegistration CourseRegistration @relation( fields: [courseRegistrationId],  references: [id], onDelete: Cascade)
+
+  grade Grade? @relation(fields: [gradeId],references: [id])
+
+  @@unique([examId, courseRegistrationId])
+  @@index([courseRegistrationId])
+  @@index([gradeId])
+  @@map("results")
+}

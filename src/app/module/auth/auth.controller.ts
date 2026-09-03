@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { AuthService } from "./auth.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status";
+import { RequestUser } from "../../middleware/checkAuth";
 
 const verifyStudentEmail = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -130,6 +131,17 @@ const googleLoginForStudent = catchAsync(
   },
 );
 
+const getMe = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await AuthService.getMe(user as RequestUser);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User data retrieved successfully",
+    data: result,
+  });
+});
+
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
   await AuthService.forgotPassword(payload);
@@ -183,6 +195,7 @@ export const AuthController = {
   refreshToken,
   logout,
   googleLoginForStudent,
+  getMe,
   forgotPassword,
   resetPassword,
   loginUser,

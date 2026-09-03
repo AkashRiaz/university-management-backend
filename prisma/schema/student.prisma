@@ -37,19 +37,19 @@ model StudentProfile {
 
   program Program @relation( fields: [programId],references: [id])
 
-//   registrations Registration[]
+  registrations Registration[]
 
-//   academicRecords AcademicRecord[]
+  academicRecords AcademicRecord[]
 
-//   invoices Invoice[]
+  invoices Invoice[]
 
-//   payments Payment[]
+  payments Payment[]
 
-//   scholarships StudentScholarship[]
+  scholarships StudentScholarship[]
 
-//   graduationApplications GraduationApplication[]
+  graduationApplications GraduationApplication[]
 
-//   transcripts Transcript[]
+  transcripts Transcript[]
 
   createdAt DateTime @default(now())
 
