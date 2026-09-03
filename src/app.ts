@@ -10,6 +10,9 @@ import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { StudentRoutes } from "./app/module/student/student.route";
 import { ProgramRoutes } from "./app/module/program/program.route";
 import { InstructorRoutes } from "./app/module/instructor/instructor.route";
+import { AcademicYearRoutes } from "./app/module/academicYear/academicYear.route";
+import { SemesterRoutes } from "./app/module/semester/semester.route";
+import { CourseRoutes } from "./app/module/course/course.route";
 const app: Application = express();
 
 app.use(
@@ -43,6 +46,9 @@ app.use("/api/v1/faculties", FacultyRoutes);
 app.use("/api/v1/students", StudentRoutes);
 app.use("/api/v1/instructors", InstructorRoutes);
 app.use("/api/v1/programs", ProgramRoutes);
+app.use("/api/v1/academic-years", AcademicYearRoutes);
+app.use("/api/v1/semesters", SemesterRoutes);
+app.use("/api/v1/courses", CourseRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
