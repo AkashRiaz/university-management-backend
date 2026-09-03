@@ -13,6 +13,7 @@ import { InstructorRoutes } from "./app/module/instructor/instructor.route";
 import { AcademicYearRoutes } from "./app/module/academicYear/academicYear.route";
 import { SemesterRoutes } from "./app/module/semester/semester.route";
 import { CourseRoutes } from "./app/module/course/course.route";
+import { ProgramCourseRoutes } from "./app/module/programCourse/programCourse.route";
 const app: Application = express();
 
 app.use(
@@ -49,6 +50,7 @@ app.use("/api/v1/programs", ProgramRoutes);
 app.use("/api/v1/academic-years", AcademicYearRoutes);
 app.use("/api/v1/semesters", SemesterRoutes);
 app.use("/api/v1/courses", CourseRoutes);
+app.use("/api/v1/program-courses", ProgramCourseRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
