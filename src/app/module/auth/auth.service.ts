@@ -133,7 +133,7 @@ const loginUser = async (payload: ILoginUserPayload) => {
     );
   }
 
-  const isPasswordMatched = await bcrypt.compare(password, user?.password!);
+  const isPasswordMatched = await bcrypt.compare(password, user?.password || "");
 
   if (!isPasswordMatched) {
     throw new AppError(httpStatus.UNAUTHORIZED, "Invalid credentials");

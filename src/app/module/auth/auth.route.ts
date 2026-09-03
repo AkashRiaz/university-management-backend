@@ -45,6 +45,7 @@ router.get(
     Role.DEPARTMENT_ADMIN,
     Role.FINANCE_ADMIN,
     Role.INSTRUCTOR,
+    Role.ADMIN,
     Role.SUPER_ADMIN,
   ),
   AuthController.getMe,

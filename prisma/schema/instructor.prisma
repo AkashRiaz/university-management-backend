@@ -2,29 +2,31 @@ model InstructorProfile {
   id String @id @default(uuid())
 
   employeeId String @unique
-
   userId String @unique
 
   designation InstructorDesignation
-
   specialization String?
-
   phone String?
-
   officeRoom String?
-
   joiningDate DateTime
+
+  dateOfBirth DateTime?
+  gender Gender?
+  address String?
+  bio String?
+  qualification String?
+
+  additionalFiles Json?
 
   departmentId String
 
-  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  user User @relation( fields: [userId], references: [id],onDelete: Cascade)
 
-  department Department @relation(fields: [departmentId],references: [id])
+  department Department @relation(fields: [departmentId],references: [id] )
 
   sections SectionInstructor[]
 
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 
   @@index([departmentId])

@@ -1,5 +1,5 @@
-import { IQuery } from "./../../interfaces/.index";
-import { Prisma, Program } from "../../../generated/prisma/client";
+import { IQuery } from "../../interfaces";
+import { Program } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import {
