@@ -4,6 +4,8 @@ model Invoice {
   invoiceNumber String @unique
 
   studentId String
+  semesterId     String
+  feeStructureId String
 
   subtotal Decimal @db.Decimal(12, 2)
 
@@ -22,6 +24,10 @@ model Invoice {
   status InvoiceStatus @default(DRAFT)
 
   student StudentProfile @relation( fields: [studentId], references: [id] )
+
+  semester       Semester @relation( fields: [semesterId], references: [id] )
+
+  feeStructure   FeeStructure @relation( fields: [feeStructureId],  references: [id])
 
   items InvoiceItem[]
 

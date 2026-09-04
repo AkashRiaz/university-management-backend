@@ -13,6 +13,8 @@ model Semester {
 
   status SemesterStatus @default(UPCOMING)
 
+  invoices    Invoice[]
+
   academicYearId String
 
   academicYear AcademicYear @relation(fields: [academicYearId],references: [id],onDelete: Cascade)
