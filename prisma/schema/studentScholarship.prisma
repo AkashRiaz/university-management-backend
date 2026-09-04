@@ -5,7 +5,7 @@ model StudentScholarship {
 
   scholarshipId String
 
-  semesterId String?
+  semesterId String
 
   amount Decimal @db.Decimal(12, 2)
 
@@ -15,7 +15,7 @@ model StudentScholarship {
 
   scholarship Scholarship @relation( fields: [scholarshipId], references: [id])
 
-  semester Semester? @relation(fields: [semesterId],references: [id] )
+  semester Semester @relation(fields: [semesterId],references: [id] )
 
   @@index([studentId])
   @@index([scholarshipId])

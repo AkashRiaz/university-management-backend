@@ -21,6 +21,8 @@ import { ClassScheduleRoutes } from "./app/module/classSchedule/classSchedule.ro
 import { AnnouncementRoutes } from "./app/module/announcement/announcement.route";
 import { FeeStructureRoutes } from "./app/module/feeStructure/feeStructure.route";
 import { FeeStructureItemRoutes } from "./app/module/feeStructureItem/feeStructureItem.route";
+import { ScholarshipRoutes } from "./app/module/scholarship/scholarship.route";
+import { StudentScholarshipRoutes } from "./app/module/studentScholarship/studentScholarship.route";
 const app: Application = express();
 
 app.use(
@@ -65,6 +67,8 @@ app.use("/api/v1/class-schedules", ClassScheduleRoutes);
 app.use("/api/v1/announcements", AnnouncementRoutes);
 app.use("/api/v1/fee-structures", FeeStructureRoutes);
 app.use("/api/v1/fee-structure-items", FeeStructureItemRoutes);
+app.use("/api/v1/scholarships", ScholarshipRoutes);
+app.use("/api/v1/student-scholarships", StudentScholarshipRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
