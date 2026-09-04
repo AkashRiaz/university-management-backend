@@ -18,6 +18,7 @@ import { CoursePrerequisiteRoutes } from "./app/module/coursePrerequisite/course
 import { RoomRoutes } from "./app/module/room/room.route";
 import { SectionRoutes } from "./app/module/section/section.route";
 import { ClassScheduleRoutes } from "./app/module/classSchedule/classSchedule.route";
+import { AnnouncementRoutes } from "./app/module/announcement/announcement.route";
 const app: Application = express();
 
 app.use(
@@ -59,6 +60,7 @@ app.use("/api/v1/course-prerequisites", CoursePrerequisiteRoutes);
 app.use("/api/v1/rooms", RoomRoutes);
 app.use("/api/v1/sections", SectionRoutes);
 app.use("/api/v1/class-schedules", ClassScheduleRoutes);
+app.use("/api/v1/announcements", AnnouncementRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
