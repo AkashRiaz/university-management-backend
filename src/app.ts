@@ -23,6 +23,8 @@ import { FeeStructureRoutes } from "./app/module/feeStructure/feeStructure.route
 import { FeeStructureItemRoutes } from "./app/module/feeStructureItem/feeStructureItem.route";
 import { ScholarshipRoutes } from "./app/module/scholarship/scholarship.route";
 import { StudentScholarshipRoutes } from "./app/module/studentScholarship/studentScholarship.route";
+import { InvoiceRoutes } from "./app/module/invoice/invoice.route";
+import { InvoiceItemRoutes } from "./app/module/invoiceItem/invoiceItem.route";
 const app: Application = express();
 
 app.use(
@@ -69,6 +71,8 @@ app.use("/api/v1/fee-structures", FeeStructureRoutes);
 app.use("/api/v1/fee-structure-items", FeeStructureItemRoutes);
 app.use("/api/v1/scholarships", ScholarshipRoutes);
 app.use("/api/v1/student-scholarships", StudentScholarshipRoutes);
+app.use("/api/v1/invoices", InvoiceRoutes);
+app.use("/api/v1/invoice-items", InvoiceItemRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
