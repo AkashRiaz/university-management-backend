@@ -26,6 +26,8 @@ import { StudentScholarshipRoutes } from "./app/module/studentScholarship/studen
 import { InvoiceRoutes } from "./app/module/invoice/invoice.route";
 import { InvoiceItemRoutes } from "./app/module/invoiceItem/invoiceItem.route";
 import { PaymentRoutes } from "./app/module/payment/payment.route";
+import { GradeScaleRoutes } from "./app/module/gradeScale/gradeScale.route";
+import { GradeRoutes } from "./app/module/grade/grade.route";
 const app: Application = express();
 
 app.use(
@@ -75,6 +77,8 @@ app.use("/api/v1/student-scholarships", StudentScholarshipRoutes);
 app.use("/api/v1/invoices", InvoiceRoutes);
 app.use("/api/v1/invoice-items", InvoiceItemRoutes);
 app.use("/api/v1/payments", PaymentRoutes);
+app.use("/api/v1/grade-scales", GradeScaleRoutes);
+app.use("/api/v1/grades", GradeRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
