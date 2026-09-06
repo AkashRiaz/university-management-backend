@@ -7,6 +7,8 @@ model Registration {
 
   semesterId String
 
+  programSemesterNumber Int
+
   status RegistrationStatus @default(DRAFT)
 
   submittedAt DateTime?

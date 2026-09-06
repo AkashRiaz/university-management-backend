@@ -28,6 +28,8 @@ import { InvoiceItemRoutes } from "./app/module/invoiceItem/invoiceItem.route";
 import { PaymentRoutes } from "./app/module/payment/payment.route";
 import { GradeScaleRoutes } from "./app/module/gradeScale/gradeScale.route";
 import { GradeRoutes } from "./app/module/grade/grade.route";
+import { RegistrationRoutes } from "./app/module/registration/registration.route";
+import { CourseRegistrationRoutes } from "./app/module/courseRegistration/courseRegistration.route";
 const app: Application = express();
 
 app.use(
@@ -79,6 +81,9 @@ app.use("/api/v1/invoice-items", InvoiceItemRoutes);
 app.use("/api/v1/payments", PaymentRoutes);
 app.use("/api/v1/grade-scales", GradeScaleRoutes);
 app.use("/api/v1/grades", GradeRoutes);
+app.use("/api/v1/registrations", RegistrationRoutes);
+app.use("/api/v1/course-registrations", CourseRegistrationRoutes);
+
 
 app.use(notFound);
 app.use(globalErrorHandler);
