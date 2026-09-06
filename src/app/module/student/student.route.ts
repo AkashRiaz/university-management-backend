@@ -9,7 +9,7 @@ import { upload } from "../../lib/multer";
 const router = Router();
 
 router.post(
-  "/",
+  "/register",
   auth(Role.ADMIN, Role.SUPER_ADMIN),
   validateRequest(createStudentZodSchema),
   StudentController.registerStudent,

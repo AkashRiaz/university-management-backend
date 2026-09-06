@@ -1,9 +1,16 @@
 import app from "./app";
 import { config } from "./app/config";
+import { deleteUnverifiedUsers } from "./app/lib/cron";
 import { transporter } from "./app/lib/nodemailer";
 import { prisma } from "./app/lib/prisma";
 import { redisClient } from "./app/lib/redis";
-import { seedDepartmentAdmin, seedFinanceAdmin, seedRegistrar, seedSuperAdmin, seedTesterAdmin } from "./app/utils/seed";
+import {
+  seedDepartmentAdmin,
+  seedFinanceAdmin,
+  seedRegistrar,
+  seedSuperAdmin,
+  seedTesterAdmin,
+} from "./app/utils/seed";
 
 const PORT = config.port;
 
@@ -30,6 +37,8 @@ const main = async () => {
     console.log("Registrar seeding completed successfully.");
     await seedFinanceAdmin();
     console.log("Finance Admin seeding completed successfully.");
+
+    await deleteUnverifiedUsers();
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

@@ -20,3 +20,5 @@ pnpm-workspace.yaml
 /generated/prisma
 
 /generated/prisma
+
+.vercel
