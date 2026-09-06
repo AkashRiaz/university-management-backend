@@ -30,6 +30,9 @@ import { GradeScaleRoutes } from "./app/module/gradeScale/gradeScale.route";
 import { GradeRoutes } from "./app/module/grade/grade.route";
 import { RegistrationRoutes } from "./app/module/registration/registration.route";
 import { CourseRegistrationRoutes } from "./app/module/courseRegistration/courseRegistration.route";
+import { AttendanceSessionRoutes } from "./app/module/attendanceSession/attendanceSession.route";
+import { AttendanceRecordRoutes } from "./app/module/attendanceRecord/attendanceRecord.route";
+import { SectionInstructorRoutes } from "./app/module/sectionInstructor/sectionInstructor.route";
 const app: Application = express();
 
 app.use(
@@ -83,7 +86,9 @@ app.use("/api/v1/grade-scales", GradeScaleRoutes);
 app.use("/api/v1/grades", GradeRoutes);
 app.use("/api/v1/registrations", RegistrationRoutes);
 app.use("/api/v1/course-registrations", CourseRegistrationRoutes);
-
+app.use("/api/v1/attendance-sessions", AttendanceSessionRoutes);
+app.use("/api/v1/attendance-records", AttendanceRecordRoutes);
+app.use("/api/v1/section-instructors", SectionInstructorRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
