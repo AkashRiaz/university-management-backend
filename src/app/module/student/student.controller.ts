@@ -10,7 +10,7 @@ const registerStudent = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: 201,
-    message: "Student registered successfully",
+    message: "Student registered successfully and verification email sent to student's email address",
     data: result,
   });
 });
