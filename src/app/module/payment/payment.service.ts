@@ -314,140 +314,149 @@ const bkashPaymentCallback = async (paymentID: string, status?: string) => {
 };
 
 const completeBkashPayment = async (paymentID: string, bkashResult: any) => {
-  return prisma.$transaction(async (tx) => {
-    /*
-     * Find payment
-     */
+  return prisma.$transaction(
+    async (tx) => {
+      /*
+       * Find payment
+       */
 
-    const payment = await tx.payment.findFirst({
-      where: {
-        gateway: PaymentGateway.BKASH,
-        gatewayReference: paymentID,
-      },
-      include: {
-        invoice: true,
-      },
-    });
+      const payment = await tx.payment.findFirst({
+        where: {
+          gateway: PaymentGateway.BKASH,
+          gatewayReference: paymentID,
+        },
+        include: {
+          invoice: true,
+        },
+      });
 
-    if (!payment) {
-      throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
-    }
+      if (!payment) {
+        throw new AppError(httpStatus.NOT_FOUND, "Payment not found");
+      }
 
-    /*
-     * Idempotency
-     */
+      /*
+       * Idempotency
+       */
 
-    if (payment.status === PaymentStatus.COMPLETED) {
+      if (payment.status === PaymentStatus.COMPLETED) {
+        return {
+          success: true,
+          status: "completed",
+          redirectURL: `${config.frontend_url}/payment/success`,
+        };
+      }
+
+      /*
+       * Prevent invalid states
+       */
+
+      if (
+        payment.status === PaymentStatus.CANCELLED ||
+        payment.status === PaymentStatus.REFUNDED
+      ) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Payment cannot be completed",
+        );
+      }
+
+      const invoice = payment.invoice;
+
+      /*
+       * Verify amount
+       */
+
+      const paymentAmount = new Prisma.Decimal(payment.amount);
+
+      const bkashAmount = new Prisma.Decimal(bkashResult.amount);
+
+      if (!paymentAmount.equals(bkashAmount)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Payment amount does not match bKash amount",
+        );
+      }
+
+      /*
+       * Calculate paid amount
+       */
+
+      const currentPaidAmount = new Prisma.Decimal(invoice.paidAmount);
+
+      const invoiceTotal = new Prisma.Decimal(invoice.total);
+
+      const newPaidAmount = currentPaidAmount.add(paymentAmount);
+
+      /*
+       * Prevent overpayment
+       */
+
+      if (newPaidAmount.greaterThan(invoiceTotal)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Payment exceeds invoice total",
+        );
+      }
+
+      /*
+       * Calculate due
+       */
+
+      const newDueAmount = invoiceTotal.sub(newPaidAmount);
+
+      const invoiceStatus = newDueAmount.equals(0)
+        ? InvoiceStatus.PAID
+        : InvoiceStatus.PARTIALLY_PAID;
+
+      /*
+       * Update Payment
+       */
+
+      await tx.payment.update({
+        where: {
+          id: payment.id,
+        },
+
+        data: {
+          status: PaymentStatus.COMPLETED,
+          metadata: bkashResult,
+          paidAt: parseBkashPaymentDate(bkashResult.paymentExecuteTime),
+        },
+      });
+
+      /*
+       * Update Invoice
+       */
+
+      await tx.invoice.update({
+        where: {
+          id: invoice.id,
+        },
+
+        data: {
+          paidAmount: newPaidAmount,
+          dueAmount: newDueAmount,
+          status: invoiceStatus,
+        },
+      });
+
       return {
         success: true,
         status: "completed",
+        invoiceId: invoice.id,
+        paymentId: payment.id,
+        transactionId: payment.transactionId,
+        amount: paymentAmount.toString(),
+        paidAmount: newPaidAmount.toString(),
+        dueAmount: newDueAmount.toString(),
         redirectURL: `${config.frontend_url}/payment/success`,
       };
-    }
-
-    /*
-     * Prevent invalid states
-     */
-
-    if (
-      payment.status === PaymentStatus.CANCELLED ||
-      payment.status === PaymentStatus.REFUNDED
-    ) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Payment cannot be completed");
-    }
-
-    const invoice = payment.invoice;
-
-    /*
-     * Verify amount
-     */
-
-    const paymentAmount = new Prisma.Decimal(payment.amount);
-
-    const bkashAmount = new Prisma.Decimal(bkashResult.amount);
-
-    if (!paymentAmount.equals(bkashAmount)) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Payment amount does not match bKash amount",
-      );
-    }
-
-    /*
-     * Calculate paid amount
-     */
-
-    const currentPaidAmount = new Prisma.Decimal(invoice.paidAmount);
-
-    const invoiceTotal = new Prisma.Decimal(invoice.total);
-
-    const newPaidAmount = currentPaidAmount.add(paymentAmount);
-
-    /*
-     * Prevent overpayment
-     */
-
-    if (newPaidAmount.greaterThan(invoiceTotal)) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Payment exceeds invoice total",
-      );
-    }
-
-    /*
-     * Calculate due
-     */
-
-    const newDueAmount = invoiceTotal.sub(newPaidAmount);
-
-    const invoiceStatus = newDueAmount.equals(0)
-      ? InvoiceStatus.PAID
-      : InvoiceStatus.PARTIALLY_PAID;
-
-    /*
-     * Update Payment
-     */
-
-    await tx.payment.update({
-      where: {
-        id: payment.id,
-      },
-
-      data: {
-        status: PaymentStatus.COMPLETED,
-        metadata: bkashResult,
-        paidAt: parseBkashPaymentDate(bkashResult.paymentExecuteTime),
-      },
-    });
-
-    /*
-     * Update Invoice
-     */
-
-    await tx.invoice.update({
-      where: {
-        id: invoice.id,
-      },
-
-      data: {
-        paidAmount: newPaidAmount,
-        dueAmount: newDueAmount,
-        status: invoiceStatus,
-      },
-    });
-
-    return {
-      success: true,
-      status: "completed",
-      invoiceId: invoice.id,
-      paymentId: payment.id,
-      transactionId: payment.transactionId,
-      amount: paymentAmount.toString(),
-      paidAmount: newPaidAmount.toString(),
-      dueAmount: newDueAmount.toString(),
-      redirectURL: `${config.frontend_url}/payment/success`,
-    };
-  });
+    },
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    },
+  );
 };
 
 const getMyPayments = async (userId: string, query: IQuery) => {

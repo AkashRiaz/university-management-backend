@@ -15,266 +15,272 @@ import httpStatus from "http-status";
 import { calculateInvoiceTotals, generateInvoiceNumber } from "./invoice.utils";
 
 const createInvoice = async (payload: ICreateInvoicePayload) => {
-  const result = await prisma.$transaction(async (tx) => {
-    // 1. Find student
+  const result = await prisma.$transaction(
+    async (tx) => {
+      // 1. Find student
 
-    const student = await tx.studentProfile.findUnique({
-      where: {
-        id: payload.studentId,
-      },
-
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+      const student = await tx.studentProfile.findUnique({
+        where: {
+          id: payload.studentId,
         },
 
-        program: true,
-
-        department: true,
-      },
-    });
-
-    if (!student) {
-      throw new AppError(httpStatus.NOT_FOUND, "Student not found");
-    }
-
-    if (!student.programId) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Student is not assigned to any program",
-      );
-    }
-
-    // ==========================================
-    // 2. Find semester
-    // ==========================================
-
-    const semester = await tx.semester.findUnique({
-      where: {
-        id: payload.semesterId,
-      },
-    });
-
-    if (!semester) {
-      throw new AppError(httpStatus.NOT_FOUND, "Semester not found");
-    }
-
-    // ==========================================
-    // 3. Prevent duplicate active invoice
-    // ==========================================
-
-    const existingInvoice = await tx.invoice.findFirst({
-      where: {
-        studentId: payload.studentId,
-
-        semesterId: payload.semesterId,
-
-        status: {
-          not: InvoiceStatus.CANCELLED,
-        },
-      },
-    });
-
-    if (existingInvoice) {
-      throw new AppError(
-        httpStatus.CONFLICT,
-        "An active invoice already exists for this student and semester",
-      );
-    }
-
-    // 4. Find FeeStructure
-
-    const feeStructure = await tx.feeStructure.findFirst({
-      where: {
-        programId: student.programId,
-
-        semesterId: payload.semesterId,
-      },
-
-      include: {
-        items: true,
-      },
-    });
-
-    if (!feeStructure) {
-      throw new AppError(
-        httpStatus.NOT_FOUND,
-        "Fee structure not found for this student's program and semester",
-      );
-    }
-
-    // ==========================================
-    // 5. Make sure FeeStructure has items
-    // ==========================================
-
-    if (feeStructure.items.length === 0) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Fee structure has no fee items",
-      );
-    }
-
-    // ==========================================
-    // 6. Calculate subtotal
-    // ==========================================
-
-    const subtotal = feeStructure.items.reduce(
-      (total: Prisma.Decimal, item) => {
-        return total.plus(item.amount);
-      },
-
-      new Prisma.Decimal(0),
-    );
-
-    // ==========================================
-    // 7. Find approved scholarships
-    // ==========================================
-
-    const studentScholarships = await tx.studentScholarship.findMany({
-      where: {
-        studentId: payload.studentId,
-        status: ApplicationStatus.APPROVED,
-        semesterId: payload.semesterId,
-      },
-    });
-
-    // ==========================================
-    // 8. Calculate scholarship discount
-    // ==========================================
-
-    const scholarshipDiscount = studentScholarships.reduce(
-      (total: Prisma.Decimal, scholarship) => {
-        return total.plus(scholarship.amount);
-      },
-      new Prisma.Decimal(0),
-    );
-
-    // 9. Manual discount
-
-    const manualDiscount = new Prisma.Decimal(payload.discount ?? 0);
-
-    // ==========================================
-    // 10. Total discount
-    // ==========================================
-
-    let totalDiscount = scholarshipDiscount.plus(manualDiscount);
-
-    // Never allow discount > subtotal
-
-    if (totalDiscount.greaterThan(subtotal)) {
-      totalDiscount = subtotal;
-    }
-
-    // ==========================================
-    // 11. Tax
-    // ==========================================
-
-    const tax = new Prisma.Decimal(payload.tax ?? 0);
-
-    // ==========================================
-    // 12. Calculate invoice totals
-    // ==========================================
-
-    const totals = calculateInvoiceTotals({
-      subtotal,
-
-      discount: totalDiscount,
-
-      tax,
-    });
-
-    // ==========================================
-    // 13. Generate invoice number
-    // ==========================================
-
-    const invoiceNumber = generateInvoiceNumber();
-
-    // ==========================================
-    // 14. Create invoice + items
-    // ==========================================
-
-    const invoice = await tx.invoice.create({
-      data: {
-        invoiceNumber,
-
-        studentId: payload.studentId,
-
-        semesterId: payload.semesterId,
-
-        feeStructureId: feeStructure.id,
-
-        subtotal: totals.subtotal,
-
-        discount: totals.discount,
-
-        tax: totals.tax,
-
-        total: totals.total,
-
-        paidAmount: new Prisma.Decimal(0),
-
-        dueAmount: totals.dueAmount,
-
-        dueDate: payload.dueDate,
-
-        status: InvoiceStatus.ISSUED,
-
-        // ======================================
-        // Automatically create InvoiceItems
-        // ======================================
-
-        items: {
-          create: feeStructure.items.map((item) => ({
-            name: item.name,
-
-            description: item.description,
-
-            quantity: 1,
-
-            unitPrice: item.amount,
-
-            totalPrice: item.amount,
-          })),
-        },
-      },
-
-      include: {
-        student: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
             },
+          },
 
-            program: true,
+          program: true,
 
-            department: true,
+          department: true,
+        },
+      });
+
+      if (!student) {
+        throw new AppError(httpStatus.NOT_FOUND, "Student not found");
+      }
+
+      if (!student.programId) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Student is not assigned to any program",
+        );
+      }
+
+      // ==========================================
+      // 2. Find semester
+      // ==========================================
+
+      const semester = await tx.semester.findUnique({
+        where: {
+          id: payload.semesterId,
+        },
+      });
+
+      if (!semester) {
+        throw new AppError(httpStatus.NOT_FOUND, "Semester not found");
+      }
+
+      // ==========================================
+      // 3. Prevent duplicate active invoice
+      // ==========================================
+
+      const existingInvoice = await tx.invoice.findFirst({
+        where: {
+          studentId: payload.studentId,
+
+          semesterId: payload.semesterId,
+
+          status: {
+            not: InvoiceStatus.CANCELLED,
+          },
+        },
+      });
+
+      if (existingInvoice) {
+        throw new AppError(
+          httpStatus.CONFLICT,
+          "An active invoice already exists for this student and semester",
+        );
+      }
+
+      // 4. Find FeeStructure
+
+      const feeStructure = await tx.feeStructure.findFirst({
+        where: {
+          programId: student.programId,
+
+          semesterId: payload.semesterId,
+        },
+
+        include: {
+          items: true,
+        },
+      });
+
+      if (!feeStructure) {
+        throw new AppError(
+          httpStatus.NOT_FOUND,
+          "Fee structure not found for this student's program and semester",
+        );
+      }
+
+      // ==========================================
+      // 5. Make sure FeeStructure has items
+      // ==========================================
+
+      if (feeStructure.items.length === 0) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Fee structure has no fee items",
+        );
+      }
+
+      // ==========================================
+      // 6. Calculate subtotal
+      // ==========================================
+
+      const subtotal = feeStructure.items.reduce(
+        (total: Prisma.Decimal, item) => {
+          return total.plus(item.amount);
+        },
+
+        new Prisma.Decimal(0),
+      );
+
+      // ==========================================
+      // 7. Find approved scholarships
+      // ==========================================
+
+      const studentScholarships = await tx.studentScholarship.findMany({
+        where: {
+          studentId: payload.studentId,
+          status: ApplicationStatus.APPROVED,
+          semesterId: payload.semesterId,
+        },
+      });
+
+      // ==========================================
+      // 8. Calculate scholarship discount
+      // ==========================================
+
+      const scholarshipDiscount = studentScholarships.reduce(
+        (total: Prisma.Decimal, scholarship) => {
+          return total.plus(scholarship.amount);
+        },
+        new Prisma.Decimal(0),
+      );
+
+      // 9. Manual discount
+
+      const manualDiscount = new Prisma.Decimal(payload.discount ?? 0);
+
+      // ==========================================
+      // 10. Total discount
+      // ==========================================
+
+      let totalDiscount = scholarshipDiscount.plus(manualDiscount);
+
+      // Never allow discount > subtotal
+
+      if (totalDiscount.greaterThan(subtotal)) {
+        totalDiscount = subtotal;
+      }
+
+      // ==========================================
+      // 11. Tax
+      // ==========================================
+
+      const tax = new Prisma.Decimal(payload.tax ?? 0);
+
+      // ==========================================
+      // 12. Calculate invoice totals
+      // ==========================================
+
+      const totals = calculateInvoiceTotals({
+        subtotal,
+
+        discount: totalDiscount,
+
+        tax,
+      });
+
+      // ==========================================
+      // 13. Generate invoice number
+      // ==========================================
+
+      const invoiceNumber = generateInvoiceNumber();
+
+      // ==========================================
+      // 14. Create invoice + items
+      // ==========================================
+
+      const invoice = await tx.invoice.create({
+        data: {
+          invoiceNumber,
+
+          studentId: payload.studentId,
+
+          semesterId: payload.semesterId,
+
+          feeStructureId: feeStructure.id,
+
+          subtotal: totals.subtotal,
+
+          discount: totals.discount,
+
+          tax: totals.tax,
+
+          total: totals.total,
+
+          paidAmount: new Prisma.Decimal(0),
+
+          dueAmount: totals.dueAmount,
+
+          dueDate: payload.dueDate,
+
+          status: InvoiceStatus.ISSUED,
+
+          // ======================================
+          // Automatically create InvoiceItems
+          // ======================================
+
+          items: {
+            create: feeStructure.items.map((item) => ({
+              name: item.name,
+
+              description: item.description,
+
+              quantity: 1,
+
+              unitPrice: item.amount,
+
+              totalPrice: item.amount,
+            })),
           },
         },
 
-        semester: true,
+        include: {
+          student: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
 
-        feeStructure: {
-          include: {
-            items: true,
+              program: true,
+
+              department: true,
+            },
           },
+
+          semester: true,
+
+          feeStructure: {
+            include: {
+              items: true,
+            },
+          },
+
+          items: true,
+
+          payments: true,
         },
+      });
 
-        items: true,
-
-        payments: true,
-      },
-    });
-
-    return invoice;
-  });
+      return invoice;
+    },
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    },
+  );
 
   return result;
 };
@@ -454,168 +460,176 @@ const getSingleInvoice = async (id: string) => {
 };
 
 const updateInvoice = async (id: string, payload: IUpdateInvoicePayload) => {
-  const result = await prisma.$transaction(async (tx) => {
-    // ==========================================
-    // 1. Find invoice
-    // ==========================================
+  const result = await prisma.$transaction(
+    async (tx) => {
+      // ==========================================
+      // 1. Find invoice
+      // ==========================================
 
-    const invoice = await tx.invoice.findUnique({
-      where: {
-        id,
-      },
-    });
+      const invoice = await tx.invoice.findUnique({
+        where: {
+          id,
+        },
+      });
 
-    if (!invoice) {
-      throw new AppError(httpStatus.NOT_FOUND, "Invoice not found");
-    }
-
-    // ==========================================
-    // 2. Cannot update cancelled
-    // ==========================================
-
-    if (invoice.status === InvoiceStatus.CANCELLED) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Cancelled invoice cannot be updated",
-      );
-    }
-
-    // ==========================================
-    // 3. Cannot update paid invoice
-    // ==========================================
-
-    if (invoice.status === InvoiceStatus.PAID) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Paid invoice cannot be updated",
-      );
-    }
-
-    // ==========================================
-    // 4. If payment exists
-    // ==========================================
-
-    const hasPayment = invoice.paidAmount.greaterThan(0);
-
-    if (
-      hasPayment &&
-      (payload.discount !== undefined || payload.tax !== undefined)
-    ) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Discount and tax cannot be changed after payment",
-      );
-    }
-
-    // ==========================================
-    // 5. Calculate discount
-    // ==========================================
-
-    const discount =
-      payload.discount !== undefined
-        ? new Prisma.Decimal(payload.discount)
-        : invoice.discount;
-
-    // ==========================================
-    // 6. Calculate tax
-    // ==========================================
-
-    const tax =
-      payload.tax !== undefined ? new Prisma.Decimal(payload.tax) : invoice.tax;
-
-    // ==========================================
-    // 7. Calculate total
-    // ==========================================
-
-    const totals = calculateInvoiceTotals({
-      subtotal: invoice.subtotal,
-
-      discount,
-
-      tax,
-    });
-
-    // ==========================================
-    // 8. Consider already paid amount
-    // ==========================================
-
-    const dueAmount = totals.total.minus(invoice.paidAmount);
-
-    if (dueAmount.lessThan(0)) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        "Invoice total cannot be less than paid amount",
-      );
-    }
-
-    // ==========================================
-    // 9. Determine status
-    // ==========================================
-
-    let status: InvoiceStatus = invoice.status;
-
-    if (invoice.paidAmount.greaterThan(0)) {
-      if (dueAmount.equals(0)) {
-        status = InvoiceStatus.PAID;
-      } else {
-        status = InvoiceStatus.PARTIALLY_PAID;
+      if (!invoice) {
+        throw new AppError(httpStatus.NOT_FOUND, "Invoice not found");
       }
-    } else {
-      status = InvoiceStatus.ISSUED;
-    }
 
-    // ==========================================
-    // 10. Update
-    // ==========================================
+      // ==========================================
+      // 2. Cannot update cancelled
+      // ==========================================
 
-    const updatedInvoice = await tx.invoice.update({
-      where: {
-        id,
-      },
+      if (invoice.status === InvoiceStatus.CANCELLED) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Cancelled invoice cannot be updated",
+        );
+      }
 
-      data: {
-        dueDate: payload.dueDate ?? invoice.dueDate,
+      // ==========================================
+      // 3. Cannot update paid invoice
+      // ==========================================
+
+      if (invoice.status === InvoiceStatus.PAID) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Paid invoice cannot be updated",
+        );
+      }
+
+      // ==========================================
+      // 4. If payment exists
+      // ==========================================
+
+      const hasPayment = invoice.paidAmount.greaterThan(0);
+
+      if (
+        hasPayment &&
+        (payload.discount !== undefined || payload.tax !== undefined)
+      ) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Discount and tax cannot be changed after payment",
+        );
+      }
+
+      // ==========================================
+      // 5. Calculate discount
+      // ==========================================
+
+      const discount =
+        payload.discount !== undefined
+          ? new Prisma.Decimal(payload.discount)
+          : invoice.discount;
+
+      // ==========================================
+      // 6. Calculate tax
+      // ==========================================
+
+      const tax =
+        payload.tax !== undefined
+          ? new Prisma.Decimal(payload.tax)
+          : invoice.tax;
+
+      // ==========================================
+      // 7. Calculate total
+      // ==========================================
+
+      const totals = calculateInvoiceTotals({
+        subtotal: invoice.subtotal,
 
         discount,
 
         tax,
+      });
 
-        total: totals.total,
+      // ==========================================
+      // 8. Consider already paid amount
+      // ==========================================
 
-        dueAmount,
+      const dueAmount = totals.total.minus(invoice.paidAmount);
 
-        status,
-      },
+      if (dueAmount.lessThan(0)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Invoice total cannot be less than paid amount",
+        );
+      }
 
-      include: {
-        student: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
+      // ==========================================
+      // 9. Determine status
+      // ==========================================
 
-            program: true,
+      let status: InvoiceStatus = invoice.status;
 
-            department: true,
-          },
+      if (invoice.paidAmount.greaterThan(0)) {
+        if (dueAmount.equals(0)) {
+          status = InvoiceStatus.PAID;
+        } else {
+          status = InvoiceStatus.PARTIALLY_PAID;
+        }
+      } else {
+        status = InvoiceStatus.ISSUED;
+      }
+
+      // ==========================================
+      // 10. Update
+      // ==========================================
+
+      const updatedInvoice = await tx.invoice.update({
+        where: {
+          id,
         },
 
-        semester: true,
+        data: {
+          dueDate: payload.dueDate ?? invoice.dueDate,
 
-        feeStructure: true,
+          discount,
 
-        items: true,
+          tax,
 
-        payments: true,
-      },
-    });
+          total: totals.total,
 
-    return updatedInvoice;
-  });
+          dueAmount,
+
+          status,
+        },
+
+        include: {
+          student: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+
+              program: true,
+
+              department: true,
+            },
+          },
+
+          semester: true,
+
+          feeStructure: true,
+
+          items: true,
+
+          payments: true,
+        },
+      });
+
+      return updatedInvoice;
+    },
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    },
+  );
 
   return result;
 };

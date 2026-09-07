@@ -12,7 +12,7 @@ export const globalErrorHandler = async (
   _next: NextFunction,
 ) => {
   // if (config.node_env === "development") {
-    console.log("Error from Global Error Handler", err);
+  console.log("Error from Global Error Handler", err);
   // }
 
   let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;
@@ -58,7 +58,12 @@ export const globalErrorHandler = async (
     success: false,
     statusCode: statusCode || httpStatus.INTERNAL_SERVER_ERROR,
     name:
-      config.node_env === "development" ? errorName : "Internal Server Error",
+      config.node_env === "development"
+        ? errorName
+        : statusCode >= 500
+          ? "Internal Server Error"
+          : "Request Error",
+
     message:
       config.node_env === "development"
         ? errorMessage

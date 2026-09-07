@@ -99,165 +99,174 @@ const createCourseRegistration = async (
 ) => {
   const { registrationId, sectionId } = payload;
 
-  return prisma.$transaction(async (tx) => {
-    const student = await tx.studentProfile.findUnique({
-      where: {
-        userId,
-      },
-    });
+  return prisma.$transaction(
+    async (tx) => {
+      const student = await tx.studentProfile.findUnique({
+        where: {
+          userId,
+        },
+      });
 
-    if (!student) {
-      throw new AppError(404, "Student profile not found");
-    }
+      if (!student) {
+        throw new AppError(404, "Student profile not found");
+      }
 
-    const registration = await tx.registration.findUnique({
-      where: {
-        id: registrationId,
-      },
-    });
+      const registration = await tx.registration.findUnique({
+        where: {
+          id: registrationId,
+        },
+      });
 
-    if (!registration) {
-      throw new AppError(404, "Registration not found");
-    }
+      if (!registration) {
+        throw new AppError(404, "Registration not found");
+      }
 
-    if (registration.studentId !== student.id) {
-      throw new AppError(
-        403,
-        "You are not allowed to modify this registration",
-      );
-    }
+      if (registration.studentId !== student.id) {
+        throw new AppError(
+          403,
+          "You are not allowed to modify this registration",
+        );
+      }
 
-    if (registration.status !== RegistrationStatus.DRAFT) {
-      throw new AppError(
-        400,
-        "Courses can only be added while registration is in draft status",
-      );
-    }
+      if (registration.status !== RegistrationStatus.DRAFT) {
+        throw new AppError(
+          400,
+          "Courses can only be added while registration is in draft status",
+        );
+      }
 
-    const section = await tx.section.findUnique({
-      where: {
-        id: sectionId,
-      },
+      const section = await tx.section.findUnique({
+        where: {
+          id: sectionId,
+        },
 
-      include: {
-        course: {
-          include: {
-            programs: true,
+        include: {
+          course: {
+            include: {
+              programs: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!section) {
-      throw new AppError(404, "Section not found");
-    }
+      if (!section) {
+        throw new AppError(404, "Section not found");
+      }
 
-    if (section.semesterId !== registration.semesterId) {
-      throw new AppError(
-        400,
-        "Selected section does not belong to this semester",
+      if (section.semesterId !== registration.semesterId) {
+        throw new AppError(
+          400,
+          "Selected section does not belong to this semester",
+        );
+      }
+
+      if (section.status !== SectionStatus.OPEN) {
+        throw new AppError(400, "Selected section is not open");
+      }
+
+      const isProgramCourse = section.course.programs.some(
+        (programCourse) =>
+          programCourse.programId === student.programId &&
+          programCourse.semesterNumber === registration.programSemesterNumber,
       );
-    }
 
-    if (section.status !== SectionStatus.OPEN) {
-      throw new AppError(400, "Selected section is not open");
-    }
+      if (!isProgramCourse) {
+        throw new AppError(
+          400,
+          "This course is not available for your program",
+        );
+      }
 
-    const isProgramCourse = section.course.programs.some(
-      (programCourse) =>
-        programCourse.programId === student.programId &&
-        programCourse.semesterNumber === registration.programSemesterNumber,
-    );
+      const existing = await tx.courseRegistration.findUnique({
+        where: {
+          registrationId_sectionId: {
+            registrationId,
+            sectionId,
+          },
+        },
+      });
 
-    if (!isProgramCourse) {
-      throw new AppError(400, "This course is not available for your program");
-    }
+      if (existing) {
+        throw new AppError(409, "This section is already registered");
+      }
 
-    const existing = await tx.courseRegistration.findUnique({
-      where: {
-        registrationId_sectionId: {
+      const existingSameCourse = await tx.courseRegistration.findFirst({
+        where: {
           registrationId,
+
+          section: {
+            courseId: section.courseId,
+          },
+
+          status: {
+            not: CourseRegistrationStatus.DROPPED,
+          },
+        },
+      });
+
+      if (existingSameCourse) {
+        throw new AppError(
+          409,
+          "You have already registered this course in another section",
+        );
+      }
+
+      // Atomic capacity update
+      const updatedSection = await tx.section.updateMany({
+        where: {
+          id: sectionId,
+
+          status: SectionStatus.OPEN,
+
+          enrolledCount: {
+            lt: section.capacity,
+          },
+        },
+
+        data: {
+          enrolledCount: {
+            increment: 1,
+          },
+        },
+      });
+
+      if (updatedSection.count === 0) {
+        throw new AppError(400, "This section is full");
+      }
+
+      const result = await tx.courseRegistration.create({
+        data: {
+          registrationId,
+
           sectionId,
-        },
-      },
-    });
 
-    if (existing) {
-      throw new AppError(409, "This section is already registered");
-    }
-
-    const existingSameCourse = await tx.courseRegistration.findFirst({
-      where: {
-        registrationId,
-
-        section: {
-          courseId: section.courseId,
+          status: CourseRegistrationStatus.REGISTERED,
         },
 
-        status: {
-          not: CourseRegistrationStatus.DROPPED,
-        },
-      },
-    });
+        include: {
+          section: {
+            include: {
+              course: true,
+              department: true,
+              room: true,
+            },
+          },
 
-    if (existingSameCourse) {
-      throw new AppError(
-        409,
-        "You have already registered this course in another section",
-      );
-    }
-
-    // Atomic capacity update
-    const updatedSection = await tx.section.updateMany({
-      where: {
-        id: sectionId,
-
-        status: SectionStatus.OPEN,
-
-        enrolledCount: {
-          lt: section.capacity,
-        },
-      },
-
-      data: {
-        enrolledCount: {
-          increment: 1,
-        },
-      },
-    });
-
-    if (updatedSection.count === 0) {
-      throw new AppError(400, "This section is full");
-    }
-
-    const result = await tx.courseRegistration.create({
-      data: {
-        registrationId,
-
-        sectionId,
-
-        status: CourseRegistrationStatus.REGISTERED,
-      },
-
-      include: {
-        section: {
-          include: {
-            course: true,
-            department: true,
-            room: true,
+          registration: {
+            include: {
+              semester: true,
+            },
           },
         },
+      });
 
-        registration: {
-          include: {
-            semester: true,
-          },
-        },
-      },
-    });
-
-    return result;
-  });
+      return result;
+    },
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    },
+  );
 };
 
 const getMyCourseRegistrations = async (
@@ -392,65 +401,71 @@ const dropCourseRegistration = async (
   userId: string,
   courseRegistrationId: string,
 ) => {
-  return prisma.$transaction(async (tx) => {
-    const student = await tx.studentProfile.findUnique({
-      where: {
-        userId,
-      },
-    });
-
-    if (!student) {
-      throw new AppError(404, "Student profile not found");
-    }
-
-    const courseRegistration = await tx.courseRegistration.findUnique({
-      where: {
-        id: courseRegistrationId,
-      },
-
-      include: {
-        registration: true,
-      },
-    });
-
-    if (!courseRegistration) {
-      throw new AppError(404, "Course registration not found");
-    }
-
-    if (courseRegistration.registration.studentId !== student.id) {
-      throw new AppError(403, "You are not allowed to drop this course");
-    }
-
-    if (courseRegistration.status !== CourseRegistrationStatus.REGISTERED) {
-      throw new AppError(400, "Only registered courses can be dropped");
-    }
-
-    const result = await tx.courseRegistration.update({
-      where: {
-        id: courseRegistrationId,
-      },
-
-      data: {
-        status: CourseRegistrationStatus.DROPPED,
-
-        droppedAt: new Date(),
-      },
-    });
-
-    await tx.section.update({
-      where: {
-        id: courseRegistration.sectionId,
-      },
-
-      data: {
-        enrolledCount: {
-          decrement: 1,
+  return prisma.$transaction(
+    async (tx) => {
+      const student = await tx.studentProfile.findUnique({
+        where: {
+          userId,
         },
-      },
-    });
+      });
 
-    return result;
-  });
+      if (!student) {
+        throw new AppError(404, "Student profile not found");
+      }
+
+      const courseRegistration = await tx.courseRegistration.findUnique({
+        where: {
+          id: courseRegistrationId,
+        },
+
+        include: {
+          registration: true,
+        },
+      });
+
+      if (!courseRegistration) {
+        throw new AppError(404, "Course registration not found");
+      }
+
+      if (courseRegistration.registration.studentId !== student.id) {
+        throw new AppError(403, "You are not allowed to drop this course");
+      }
+
+      if (courseRegistration.status !== CourseRegistrationStatus.REGISTERED) {
+        throw new AppError(400, "Only registered courses can be dropped");
+      }
+
+      const result = await tx.courseRegistration.update({
+        where: {
+          id: courseRegistrationId,
+        },
+
+        data: {
+          status: CourseRegistrationStatus.DROPPED,
+
+          droppedAt: new Date(),
+        },
+      });
+
+      await tx.section.update({
+        where: {
+          id: courseRegistration.sectionId,
+        },
+
+        data: {
+          enrolledCount: {
+            decrement: 1,
+          },
+        },
+      });
+
+      return result;
+    },
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    },
+  );
 };
 
 export const CourseRegistrationService = {

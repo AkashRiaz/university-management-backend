@@ -22,3 +22,6 @@ pnpm-workspace.yaml
 /generated/prisma
 
 .vercel
+
+.vercel
+.env*.local
