@@ -48,7 +48,7 @@ const createDepartment = async (payload: ICreateDepartmentPayload) => {
 };
 
 const getAllDepartments = async (query: IQuery) => {
-  const limit = query.limit ? parseInt(query.limit) : 10;
+  const limit = query.limit ? parseInt(query.limit) : 100;
 
   const page = query.page ? parseInt(query.page) : 1;
 

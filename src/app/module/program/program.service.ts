@@ -69,7 +69,7 @@ const createProgram = async (payload: ICreateProgramPayload) => {
 };
 
 const getAllPrograms = async (query: IQuery) => {
-  const limit = query.limit ? parseInt(query.limit) : 10;
+  const limit = query.limit ? parseInt(query.limit) : 100;
   const page = query.page ? parseInt(query.page) : 1;
   const skip = (page - 1) * limit;
   const sortBy = query.sortBy || "createdAt";
