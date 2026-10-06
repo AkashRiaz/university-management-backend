@@ -23,6 +23,14 @@ const getScheduleInclude = {
 };
 
 const createClassSchedule = async (payload: ICreateClassSchedulePayload) => {
+  const daysOfWeek = [
+    ...new Set(
+      Array.isArray(payload.dayOfWeek)
+        ? payload.dayOfWeek
+        : [payload.dayOfWeek],
+    ),
+  ];
+
   // Check section
   const section = await prisma.section.findUnique({
     where: {
@@ -84,7 +92,9 @@ const createClassSchedule = async (payload: ICreateClassSchedulePayload) => {
     where: {
       sectionId: payload.sectionId,
 
-      dayOfWeek: payload.dayOfWeek,
+      dayOfWeek: {
+        in: daysOfWeek,
+      },
 
       startTime: {
         lt: payload.endTime,
@@ -109,7 +119,9 @@ const createClassSchedule = async (payload: ICreateClassSchedulePayload) => {
       where: {
         roomId: payload.roomId,
 
-        dayOfWeek: payload.dayOfWeek,
+        dayOfWeek: {
+          in: daysOfWeek,
+        },
 
         startTime: {
           lt: payload.endTime,
@@ -129,25 +141,23 @@ const createClassSchedule = async (payload: ICreateClassSchedulePayload) => {
     }
   }
 
-  const classSchedule = await prisma.classSchedule.create({
-    data: {
-      dayOfWeek: payload.dayOfWeek,
+  const schedules = await prisma.$transaction(
+    daysOfWeek.map((dayOfWeek) =>
+      prisma.classSchedule.create({
+        data: {
+          dayOfWeek,
+          startTime: payload.startTime,
+          endTime: payload.endTime,
+          sectionId: payload.sectionId,
+          roomId: payload.roomId,
+          departmentId: payload.departmentId,
+        },
+        include: getScheduleInclude,
+      }),
+    ),
+  );
 
-      startTime: payload.startTime,
-
-      endTime: payload.endTime,
-
-      sectionId: payload.sectionId,
-
-      roomId: payload.roomId,
-
-      departmentId: payload.departmentId,
-    },
-
-    include: getScheduleInclude,
-  });
-
-  return classSchedule;
+  return schedules.length === 1 ? schedules[0] : schedules;
 };
 
 const getAllClassSchedules = async (query: IQuery) => {
@@ -450,7 +460,17 @@ const updateClassSchedule = async (
   }
 
   // Final values after update
-  const dayOfWeek = payload.dayOfWeek ?? existingSchedule.dayOfWeek;
+  const daysOfWeek = [
+    ...new Set(
+      payload.dayOfWeek === undefined
+        ? [existingSchedule.dayOfWeek]
+        : Array.isArray(payload.dayOfWeek)
+          ? payload.dayOfWeek
+          : [payload.dayOfWeek],
+    ),
+  ];
+
+  const dayOfWeek = daysOfWeek[0];
 
   const startTime = payload.startTime ?? existingSchedule.startTime;
 
@@ -531,7 +551,9 @@ const updateClassSchedule = async (
 
       sectionId,
 
-      dayOfWeek,
+      dayOfWeek: {
+        in: daysOfWeek,
+      },
 
       startTime: {
         lt: endTime,
@@ -580,41 +602,54 @@ const updateClassSchedule = async (
     }
   }
 
-  const classSchedule = await prisma.classSchedule.update({
-    where: {
-      id,
-    },
+  const schedules = await prisma.$transaction(async (tx) => {
+    const updatedSchedule = await tx.classSchedule.update({
+      where: {
+        id,
+      },
 
-    data: {
-      ...(payload.dayOfWeek !== undefined && {
-        dayOfWeek: payload.dayOfWeek,
-      }),
+      data: {
+        dayOfWeek,
+        ...(payload.startTime !== undefined && {
+          startTime: payload.startTime,
+        }),
+        ...(payload.endTime !== undefined && {
+          endTime: payload.endTime,
+        }),
+        ...(payload.sectionId !== undefined && {
+          sectionId: payload.sectionId,
+        }),
+        ...(payload.roomId !== undefined && {
+          roomId: payload.roomId,
+        }),
+        ...(payload.departmentId !== undefined && {
+          departmentId: payload.departmentId,
+        }),
+      },
 
-      ...(payload.startTime !== undefined && {
-        startTime: payload.startTime,
-      }),
+      include: getScheduleInclude,
+    });
 
-      ...(payload.endTime !== undefined && {
-        endTime: payload.endTime,
-      }),
+    const additionalSchedules = await Promise.all(
+      daysOfWeek.slice(1).map((additionalDayOfWeek) =>
+        tx.classSchedule.create({
+          data: {
+            dayOfWeek: additionalDayOfWeek,
+            startTime,
+            endTime,
+            sectionId,
+            roomId,
+            departmentId,
+          },
+          include: getScheduleInclude,
+        }),
+      ),
+    );
 
-      ...(payload.sectionId !== undefined && {
-        sectionId: payload.sectionId,
-      }),
-
-      ...(payload.roomId !== undefined && {
-        roomId: payload.roomId,
-      }),
-
-      ...(payload.departmentId !== undefined && {
-        departmentId: payload.departmentId,
-      }),
-    },
-
-    include: getScheduleInclude,
+    return [updatedSchedule, ...additionalSchedules];
   });
 
-  return classSchedule;
+  return schedules.length === 1 ? schedules[0] : schedules;
 };
 
 const deleteClassSchedule = async (id: string) => {
@@ -636,7 +671,6 @@ const deleteClassSchedule = async (id: string) => {
 
   return null;
 };
-
 
 export const ClassScheduleService = {
   createClassSchedule,

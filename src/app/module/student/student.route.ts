@@ -3,7 +3,12 @@ import { StudentController } from "./student.controller";
 import { auth } from "../../middleware/checkAuth";
 import { Role } from "../../../generated/prisma/enums";
 import { validateRequest } from "../../middleware/validateRequest";
-import { createStudentZodSchema, UpdateStudentAdminZodSchema, UpdateStudentSelfZodSchema } from "./student.validation";
+import {
+  createStudentZodSchema,
+  ResendStudentOtpZodSchema,
+  UpdateStudentAdminZodSchema,
+  UpdateStudentSelfZodSchema,
+} from "./student.validation";
 import { upload } from "../../lib/multer";
 
 const router = Router();
@@ -13,6 +18,12 @@ router.post(
   auth(Role.ADMIN, Role.SUPER_ADMIN),
   validateRequest(createStudentZodSchema),
   StudentController.registerStudent,
+);
+
+router.post(
+  "/resend-verification-otp",
+  validateRequest(ResendStudentOtpZodSchema),
+  StudentController.resendStudentVerificationOtp,
 );
 
 

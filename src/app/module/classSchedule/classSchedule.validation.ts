@@ -4,7 +4,10 @@ const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 export const CreateClassScheduleZodSchema = z
   .object({
-    dayOfWeek: z.number().int().min(1).max(7),
+    dayOfWeek: z.union([
+      z.number().int().min(1).max(7),
+      z.array(z.number().int().min(1).max(7)).min(1),
+    ]),
 
     startTime: z
       .string()
@@ -25,7 +28,12 @@ export const CreateClassScheduleZodSchema = z
 
 export const UpdateClassScheduleZodSchema = z
   .object({
-    dayOfWeek: z.number().int().min(1).max(7).optional(),
+    dayOfWeek: z
+      .union([
+        z.number().int().min(1).max(7),
+        z.array(z.number().int().min(1).max(7)).min(1),
+      ])
+      .optional(),
 
     startTime: z
       .string()

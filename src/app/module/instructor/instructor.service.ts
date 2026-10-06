@@ -527,6 +527,36 @@ const getInstructorById = async (id: string) => {
   return instructor;
 };
 
+const getMyInstructorProfile = async (userId: string) => {
+  const instructor = await prisma.instructorProfile.findUnique({
+    where: {
+      userId,
+    },
+
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+
+      department: true,
+
+      sections: {
+        include: {
+          section: true,
+        },
+      },
+    },
+  });
+
+  if (!instructor) {
+    throw new AppError(404, "Instructor profile not found");
+  }
+
+  return instructor;
+};
+
 const updateMyProfile = async (
   userId: string,
 
@@ -873,6 +903,7 @@ export const InstructorService = {
   resendInstructorVerificationOtp,
   getAllInstructors,
   getInstructorById,
+  getMyInstructorProfile,
   updateMyProfile,
   updateInstructorByAdmin,
   deleteInstructor,

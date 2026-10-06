@@ -15,6 +15,19 @@ const registerStudent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const resendStudentVerificationOtp = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await StudentService.resendStudentVerificationOtp(req.body);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Student verification OTP sent successfully",
+      data: result,
+    });
+  },
+);
+
 const getAllStudents = catchAsync(async (req: Request, res: Response) => {
   const query = req.query;
 
@@ -122,6 +135,7 @@ const deleteStudent = catchAsync(async (req: Request, res: Response) => {
 
 export const StudentController = {
   registerStudent,
+  resendStudentVerificationOtp,
   getAllStudents,
   getStudentById,
   getMyStudentProfile,

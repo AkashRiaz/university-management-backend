@@ -13,6 +13,10 @@ export interface ICreateStudentPayload {
   emergencyContactPhone?: string;
 }
 
+export interface IResendStudentOtpPayload {
+  email: string;
+}
+
 export interface IUpdateStudentSelfPayload {
   name?: string;
   dateOfBirth?: Date;

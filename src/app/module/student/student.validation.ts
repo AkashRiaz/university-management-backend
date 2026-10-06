@@ -31,6 +31,10 @@ export const createStudentZodSchema = z.object({
   emergencyContactPhone: z.string().trim().optional(),
 });
 
+export const ResendStudentOtpZodSchema = z.object({
+  email: z.email("Invalid email address").toLowerCase(),
+});
+
 /*
  * Student can update only their own
  * personal/profile information.

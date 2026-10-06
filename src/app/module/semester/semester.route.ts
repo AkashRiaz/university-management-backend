@@ -19,13 +19,6 @@ router.post(
 
 router.get(
   "/",
-  auth(
-    Role.SUPER_ADMIN,
-    Role.ADMIN,
-    Role.DEPARTMENT_ADMIN,
-    Role.REGISTRAR,
-    Role.FINANCE_ADMIN,
-  ),
   SemesterController.getAllSemesters,
 );
 

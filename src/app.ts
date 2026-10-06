@@ -33,6 +33,7 @@ import { CourseRegistrationRoutes } from "./app/module/courseRegistration/course
 import { AttendanceSessionRoutes } from "./app/module/attendanceSession/attendanceSession.route";
 import { AttendanceRecordRoutes } from "./app/module/attendanceRecord/attendanceRecord.route";
 import { SectionInstructorRoutes } from "./app/module/sectionInstructor/sectionInstructor.route";
+import { DashboardRoutes } from "./app/module/dashboard/dashboard.route";
 const app: Application = express();
 
 app.use(
@@ -89,6 +90,7 @@ app.use("/api/v1/course-registrations", CourseRegistrationRoutes);
 app.use("/api/v1/attendance-sessions", AttendanceSessionRoutes);
 app.use("/api/v1/attendance-records", AttendanceRecordRoutes);
 app.use("/api/v1/section-instructors", SectionInstructorRoutes);
+app.use("/api/v1/dashboard", DashboardRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);

@@ -3,6 +3,7 @@ import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/AppError";
 import {
   ICreateStudentPayload,
+  IResendStudentOtpPayload,
   IUpdateStudentAdminPayload,
   IUpdateStudentSelfPayload,
 } from "./student.interface";
@@ -144,6 +145,84 @@ const registerStudent = async (payload: ICreateStudentPayload) => {
   return { user: result.user, studentProfile: result.studentProfile };
 };
 
+const resendStudentVerificationOtp = async (
+  payload: IResendStudentOtpPayload,
+) => {
+  const { email } = payload;
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+
+    include: {
+      student: true,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  if (user.role !== Role.STUDENT) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "This account is not a student account",
+    );
+  }
+
+  if (!user.student) {
+    throw new AppError(httpStatus.NOT_FOUND, "Student profile not found");
+  }
+
+  if (user.emailVerified) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Email is already verified");
+  }
+
+  if (user.status === UserStatus.SUSPENDED) {
+    throw new AppError(httpStatus.FORBIDDEN, "User is suspended");
+  }
+
+  if (user.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, "User is deleted");
+  }
+
+  const expirationSeconds = 5 * 60;
+  const otp = crypto.randomInt(100000, 999999).toString();
+  const otpKey = `student-verification-otp:${user.email}`;
+
+  await redisClient.set(otpKey, otp, {
+    expiration: {
+      type: "EX",
+      value: expirationSeconds,
+    },
+  });
+
+  const templatePath = path.join(
+    process.cwd(),
+    "src/app/templates/student-welcome-otp.ejs",
+  );
+
+  const html = await ejs.renderFile(templatePath, {
+    name: user.name,
+    studentId: user.student.studentId,
+    tempPassword: "Use your previously provided temporary password",
+    otp,
+    expirationMinutes: expirationSeconds / 60,
+  });
+
+  await transporter.sendMail({
+    from: config.smtp_user,
+    to: user.email,
+    subject: "Your student verification OTP",
+    html,
+  });
+
+  return {
+    message: "Verification OTP sent successfully",
+  };
+};
+
 const getAllStudents = async (query: IQuery) => {
   const limit = query.limit ? parseInt(query.limit) : 10;
 
@@ -215,6 +294,14 @@ const getAllStudents = async (query: IQuery) => {
   if (query.departmentId) {
     andConditions.push({
       departmentId: query.departmentId,
+    });
+  }
+
+  if(query.isDeleted) {
+    andConditions.push({
+      user: {
+        isDeleted: query.isDeleted === "true",
+      },
     });
   }
 
@@ -685,6 +772,7 @@ const deleteStudent = async (id: string) => {
 
 export const StudentService = {
   registerStudent,
+  resendStudentVerificationOtp,
   getAllStudents,
   getStudentById,
   getMyStudentProfile,

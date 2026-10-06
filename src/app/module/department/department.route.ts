@@ -19,7 +19,6 @@ router.post(
 
 router.get(
   "/",
-  auth(Role.ADMIN, Role.SUPER_ADMIN, Role.INSTRUCTOR, Role.STUDENT),
   DepartmentController.getAllDepartments,
 );
 

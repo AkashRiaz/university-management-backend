@@ -86,6 +86,18 @@ const getInstructorById = async (req: Request, res: Response) => {
   });
 };
 
+const getMyInstructorProfile = async (req: Request, res: Response) => {
+  const { userId } = req.user as { userId: string };
+  const result = await InstructorService.getMyInstructorProfile(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Your instructor profile retrieved successfully",
+    data: result,
+  });
+};
+
 const updateMyProfile = async (req: Request, res: Response) => {
   const { userId } = req.user as { userId: string };
   console.log(req.files);
@@ -150,6 +162,7 @@ export const InstructorController = {
   resendInstructorVerificationOtp,
   getAllInstructors,
   getInstructorById,
+  getMyInstructorProfile,
   updateMyProfile,
   updateInstructorByAdmin,
   deleteInstructor,

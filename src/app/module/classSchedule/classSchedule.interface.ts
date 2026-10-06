@@ -1,5 +1,5 @@
 export interface ICreateClassSchedulePayload {
-  dayOfWeek: number;
+  dayOfWeek: number | number[];
   startTime: string;
   endTime: string;
   sectionId: string;
@@ -8,7 +8,7 @@ export interface ICreateClassSchedulePayload {
 }
 
 export interface IUpdateClassSchedulePayload {
-  dayOfWeek?: number;
+  dayOfWeek?: number | number[];
   startTime?: string;
   endTime?: string;
   sectionId?: string;

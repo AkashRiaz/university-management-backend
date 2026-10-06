@@ -29,6 +29,11 @@ router.post(
 );
 
 router.get("/", InstructorController.getAllInstructors);
+router.get(
+  "/me",
+  auth(Role.INSTRUCTOR),
+  InstructorController.getMyInstructorProfile,
+);
 router.patch(
   "/me",
   auth(Role.INSTRUCTOR),
